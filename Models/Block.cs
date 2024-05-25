@@ -8,29 +8,38 @@ namespace NetCraft.Models;
 
 public class Block
 {
+    public Block(string blockId)
+    {
+        _shader = new(_blockMap.Contains(blockId) ? blockId : "blockNormal");
+        _diffuseMap = Texture.LoadFromId(blockId);
+        _specularMap = Texture.LoadFromId(blockId + "_specular");
+    }
+
+    private static List<string> _blockMap = new()
+    {
+        "blockLamp"
+    };
+
     private int _vertexBufferObject;
     private int _vertexArrayObject;
 
-    public (int, int, int) Position { get; set; }
+    public Vector3i Position { get; set; }
 
     public bool HasNormal { private get; init; }
     public bool HasTexture { private get; init; }
 
-    public required Shader Shader { init => _shader = value; }
     private Shader _shader = null!;
 
-    public string DiffuseMapPath {init => _diffuseMap = new(() => Texture.LoadFromFile(value)); }
-    private Lazy<Texture>? _diffuseMap;
+    private Texture? _diffuseMap;
 
-    public string SpecularMapPath {init => _specularMap = new(() => Texture.LoadFromFile(value)); }
-    private Lazy<Texture>? _specularMap;
+    private Texture? _specularMap;
 
-    public bool DrawTop       { get; set; } = true;
-    public bool DrawBottom    { get; set; } = true;
-    public bool DrawXyFront   { get; set; } = true;
-    public bool DrawXyBack    { get; set; } = true;
-    public bool DrawYzFront   { get; set; } = true;
-    public bool DrawYzBack    { get; set; } = true;
+    public bool DrawTop     { get; set; } = true;
+    public bool DrawBottom  { get; set; } = true;
+    public bool DrawXyFront { get; set; } = true;
+    public bool DrawXyBack  { get; set; } = true;
+    public bool DrawYzFront { get; set; } = true;
+    public bool DrawYzBack  { get; set; } = true;
 
     protected float[] _vertices =
     {
@@ -110,8 +119,8 @@ public class Block
     {
         GL.BindVertexArray(_vertexArrayObject);
 
-        _diffuseMap?.Value.Use(TextureUnit.Texture0);
-        _specularMap?.Value.Use(TextureUnit.Texture1);
+        _diffuseMap?.Use(TextureUnit.Texture0);
+        _specularMap?.Use(TextureUnit.Texture1);
         _shader.Use();
 
         _shader.SetMatrix4("model", Matrix4.Identity * Matrix4.CreateTranslation(Position));

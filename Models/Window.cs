@@ -17,7 +17,6 @@ public class Window : GameWindow
     /* private List<Block> _blocks; */
     private Chunk _chunk;
     private Block _block;
-    private Block _lamp;
 
     private Camera _camera;
     private Stopwatch _watch = new();
@@ -40,22 +39,18 @@ public class Window : GameWindow
         GL.Enable(EnableCap.CullFace);
         GL.CullFace(CullFaceMode.Back);
 
-        _lightingShader = new Shader("Shaders/shader.vert", "Shaders/lighting.frag");
+        _camera = new Camera(new Vector3(6f, 17f, 6f), Size.X / (float)Size.Y);
 
-        _camera = new Camera(new Vector3(6f,17f,6f), Size.X / (float)Size.Y);
+        _chunk = new((0, 0));
 
-        _chunk = new (_lightingShader, (0, 0));
-        _chunk.Load();
-
-        _lamp = new ()
+        _chunk.Blocks[8, 18, 8] = new("blockLamp")
         {
-            Shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag"),
             Position = (8, 18, 8),
             HasNormal = false,
             HasTexture = false,
         };
 
-        _lamp.Load();
+        _chunk.Load();
 
         CursorState = CursorState.Grabbed;
     }
@@ -67,12 +62,11 @@ public class Window : GameWindow
 
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-        _chunk.Render(_camera, _lamp.Position);
-        _lamp.Render(_camera, _lamp.Position);
+        _chunk.Render(_camera, (8, 18, 8));
 
         SwapBuffers();
 
-        Console.WriteLine($"FPS: {Math.Round(1000d / _watch.Elapsed.TotalMilliseconds,2)}({_watch.Elapsed.TotalMilliseconds}ms)");
+        Console.WriteLine($"FPS: {Math.Round(1000d / _watch.Elapsed.TotalMilliseconds, 2)}({_watch.Elapsed.TotalMilliseconds}ms)");
         _watch.Reset();
     }
 
@@ -82,10 +76,9 @@ public class Window : GameWindow
 
         Console.WriteLine("Camera: " + _camera.Position);
         Console.WriteLine("CameraFacing: " + _camera.Front);
-        Console.WriteLine("Lamp: " + _lamp.Position);
         try
         {
-            _chunk.Blocks[(int)_camera.Position.X,(int)_camera.Position.Y,(int)_camera.Position.Z].Dump();
+            _chunk.Blocks[(int)_camera.Position.X, (int)_camera.Position.Y, (int)_camera.Position.Z]?.Dump();
         }
         catch (IndexOutOfRangeException)
         {

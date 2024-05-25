@@ -14,8 +14,10 @@ public class Shader
     // Shaders are written in GLSL, which is a language very similar to C in its semantics.
     // The GLSL source is compiled *at runtime*, so it can optimize itself for the graphics card it's currently being used on.
     // A commented example of GLSL can be found in shader.vert.
-    public Shader(string vertPath, string fragPath)
+    public Shader(string id)
     {
+        string vertPath = $"Shaders/{id}.vert";
+        string fragPath = $"Shaders/{id}.frag";
         // There are several different types of shaders, but the only two you need for basic rendering are the vertex and fragment shaders.
         // The vertex shader is responsible for moving around vertices, and uploading that data to the fragment shader.
         //   The vertex shader won't be too important here, but they'll be more important later.

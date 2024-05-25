@@ -1,9 +1,9 @@
-using OpenTK.Graphics.OpenGL4;
 using System.Drawing;
 using System.Drawing.Imaging;
-using PixelFormat = OpenTK.Graphics.OpenGL4.PixelFormat;
-using StbImageSharp;
 using System.IO;
+using OpenTK.Graphics.OpenGL4;
+using StbImageSharp;
+using PixelFormat = OpenTK.Graphics.OpenGL4.PixelFormat;
 
 namespace NetCraft.Models;
 
@@ -11,14 +11,25 @@ namespace NetCraft.Models;
 public class Texture
 {
     public readonly int Handle;
-    private static readonly Dictionary<string,Texture> _cache = new();
+    private static readonly Dictionary<string, Texture> _cache = new();
 
-    public static Texture LoadFromFile(string path)
+    public static Texture? LoadFromId(string id)
     {
-        if(_cache.ContainsKey(path))
+        var path = $"Resources/{id}.png";
+
+        if (_cache.ContainsKey(path))
         {
             return _cache[path];
         }
+        return LoadFromFile(path);
+    }
+
+    public static Texture? LoadFromFile(string path)
+    {
+        if (_cache.ContainsKey(path))
+            return _cache[path];
+        if (!File.Exists(path))
+            return null;
 
         // Generate handle
         int handle = GL.GenTexture();
