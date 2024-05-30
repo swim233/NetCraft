@@ -43,12 +43,7 @@ public class Window : GameWindow
 
         _chunk = new((0, 0));
 
-        _chunk.Blocks[8, 18, 8] = new("blockLamp")
-        {
-            Position = (8, 18, 8),
-            HasNormal = false,
-            HasTexture = false,
-        };
+        _chunk.Blocks[8, 15, 8] = new("blockLamp") { Position = (8, 15, 8), };
 
         _chunk.Load();
 

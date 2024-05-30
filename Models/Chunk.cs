@@ -26,14 +26,22 @@ public class Chunk
         for (int y = 0; y < GenerateSizeY; y++)
         for (int z = 0; z < GenerateSizeZ; z++)
         {
-            Blocks[x, y, z] = new Block("container2")
-            {
-                Position = new(x + Location.X * SizeX, y, z + Location.Y * SizeZ),
-                HasNormal = true,
-                HasTexture = true,
-            };
+            Blocks[x, y, z] = new Block("container2") { Position = new(x + Location.X * SizeX, y, z + Location.Y * SizeZ), };
         }
         Console.WriteLine("Construct time(ms): " + watch.Elapsed.TotalMilliseconds);
+        watch.Reset();
+    }
+
+    public void Load()
+    {
+        watch.Start();
+        for (int x = 0; x < SizeX; x++)
+        for (int y = 0; y < SizeY; y++)
+        for (int z = 0; z < SizeZ; z++)
+        {
+            Blocks[x, y, z]?.Load();
+        }
+        Console.WriteLine("Load time(ms): " + watch.Elapsed.TotalMilliseconds);
         watch.Restart();
 
         for (int x = 0; x < GenerateSizeX; x++)
@@ -57,19 +65,6 @@ public class Chunk
                 block.DrawXyBack = false;
         }
         Console.WriteLine("Facecull time(ms): " + watch.Elapsed.TotalMilliseconds);
-        watch.Reset();
-    }
-
-    public void Load()
-    {
-        watch.Start();
-        for (int x = 0; x < SizeX; x++)
-        for (int y = 0; y < SizeY; y++)
-        for (int z = 0; z < SizeZ; z++)
-        {
-            Blocks[x, y, z]?.Load();
-        }
-        Console.WriteLine("Load time(ms): " + watch.Elapsed.TotalMilliseconds);
         watch.Reset();
     }
 

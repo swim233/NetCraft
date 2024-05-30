@@ -1,8 +1,8 @@
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
-using OpenTK.Windowing.GraphicsLibraryFramework;
 using OpenTK.Windowing.Desktop;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace NetCraft.Models;
 
@@ -11,87 +11,32 @@ public class Block
     public Block(string blockId)
     {
         _shader = new(_blockMap.Contains(blockId) ? blockId : "blockNormal");
-        _diffuseMap = Texture.LoadFromId(blockId);
-        _specularMap = Texture.LoadFromId(blockId + "_specular");
+        Model = BlockModel.GetModel(blockId);
     }
 
-    private static List<string> _blockMap = new()
-    {
-        "blockLamp"
-    };
+    private static List<string> _blockMap = new() { "blockLamp" };
 
     private int _vertexBufferObject;
     private int _vertexArrayObject;
 
     public Vector3i Position { get; set; }
 
-    public bool HasNormal { private get; init; }
-    public bool HasTexture { private get; init; }
-
     private Shader _shader = null!;
 
-    private Texture? _diffuseMap;
-
-    private Texture? _specularMap;
-
-    public bool DrawTop     { get; set; } = true;
-    public bool DrawBottom  { get; set; } = true;
+    public bool DrawTop { get; set; } = true;
+    public bool DrawBottom { get; set; } = true;
     public bool DrawXyFront { get; set; } = true;
-    public bool DrawXyBack  { get; set; } = true;
+    public bool DrawXyBack { get; set; } = true;
     public bool DrawYzFront { get; set; } = true;
-    public bool DrawYzBack  { get; set; } = true;
+    public bool DrawYzBack { get; set; } = true;
 
-    protected float[] _vertices =
-    {
-        // Positions          Normals              Texture coords
-         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f, // xy back
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, // xy front
-         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
-
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f, // yz back
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, // yz front
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f, // bottom
-         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f, // top
-         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-    };
+    public BlockModel Model { get; init; }
 
     public void Load()
     {
         _vertexBufferObject = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
-        GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StaticDraw);
+        GL.BufferData(BufferTarget.ArrayBuffer, Model.Vertices.Length * sizeof(float), Model.Vertices, BufferUsageHint.StaticDraw);
 
         _vertexArrayObject = GL.GenVertexArray();
         GL.BindVertexArray(_vertexArrayObject);
@@ -100,14 +45,11 @@ public class Block
         GL.EnableVertexAttribArray(positionLocation);
         GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
 
-        if(HasNormal)
-        {
-            var normalLocation = _shader.GetAttribLocation("aNormal");
-            GL.EnableVertexAttribArray(normalLocation);
-            GL.VertexAttribPointer(normalLocation, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 3 * sizeof(float));
-        }
+        var normalLocation = _shader.GetAttribLocation("aNormal");
+        GL.EnableVertexAttribArray(normalLocation);
+        GL.VertexAttribPointer(normalLocation, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 3 * sizeof(float));
 
-        if(HasTexture)
+        if (Model.DiffuseMap is not null)
         {
             var texCoordLocation = _shader.GetAttribLocation("aTexCoords");
             GL.EnableVertexAttribArray(texCoordLocation);
@@ -119,21 +61,20 @@ public class Block
     {
         GL.BindVertexArray(_vertexArrayObject);
 
-        _diffuseMap?.Use(TextureUnit.Texture0);
-        _specularMap?.Use(TextureUnit.Texture1);
+        Model.DiffuseMap?.Use(TextureUnit.Texture0);
+        Model.SpecularMap?.Use(TextureUnit.Texture1);
         _shader.Use();
 
         _shader.SetMatrix4("model", Matrix4.Identity * Matrix4.CreateTranslation(Position));
         _shader.SetMatrix4("view", camera.GetViewMatrix());
         _shader.SetMatrix4("projection", camera.GetProjectionMatrix());
 
-
-        if(_diffuseMap is not null)
+        if (Model.DiffuseMap is not null)
         {
             _shader.SetVector3("viewPos", camera.Position);
             _shader.SetInt("material.diffuse", 0);
         }
-        if(_specularMap is not null)
+        if (Model.SpecularMap is not null)
         {
             _shader.SetInt("material.specular", 1);
             _shader.SetVector3("material.specular", new Vector3(0.5f, 0.5f, 0.5f));
@@ -145,17 +86,17 @@ public class Block
             _shader.SetVector3("light.specular", new Vector3(1.0f));
         }
 
-        if(DrawXyBack)
+        if (DrawXyBack)
             GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
-        if(DrawXyFront)
+        if (DrawXyFront)
             GL.DrawArrays(PrimitiveType.Triangles, 6, 6);
-        if(DrawYzBack)
+        if (DrawYzBack)
             GL.DrawArrays(PrimitiveType.Triangles, 12, 6);
-        if(DrawYzFront)
+        if (DrawYzFront)
             GL.DrawArrays(PrimitiveType.Triangles, 18, 6);
-        if(DrawBottom)
+        if (DrawBottom)
             GL.DrawArrays(PrimitiveType.Triangles, 24, 6);
-        if(DrawTop)
+        if (DrawTop)
             GL.DrawArrays(PrimitiveType.Triangles, 30, 6);
     }
 
