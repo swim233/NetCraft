@@ -10,7 +10,7 @@ public class Block
 {
     public Block(string blockId)
     {
-        _shader = new(_blockMap.Contains(blockId) ? blockId : "blockNormal");
+        _shader = Shader.GetShaderFromId(_blockMap.Contains(blockId) ? blockId : "blockNormal");
         Model = BlockModel.GetModel(blockId);
     }
 

@@ -7,14 +7,28 @@ namespace NetCraft.Models;
 public class Shader
 {
     public readonly int Handle;
-
+    private static readonly Dictionary<string, Shader> _cache = new();
     private readonly Dictionary<string, int> _uniformLocations;
+
+    public static Shader GetShaderFromId(string id)
+    {
+        if (_cache.TryGetValue(id, out var early))
+        {
+            return early;
+        }
+        else
+        {
+            Shader shader = new(id);
+            _cache.Add(id, shader);
+            return shader;
+        }
+    }
 
     // This is how you create a simple shader.
     // Shaders are written in GLSL, which is a language very similar to C in its semantics.
     // The GLSL source is compiled *at runtime*, so it can optimize itself for the graphics card it's currently being used on.
     // A commented example of GLSL can be found in shader.vert.
-    public Shader(string id)
+    private Shader(string id)
     {
         string vertPath = $"Shaders/{id}.vert";
         string fragPath = $"Shaders/{id}.frag";
