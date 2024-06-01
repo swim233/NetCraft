@@ -1,3 +1,5 @@
+using System.Collections;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
 namespace NetCraft;
@@ -7,6 +9,9 @@ public class Chunk
     public Block?[,,] Blocks { get; set; } = new Block[SizeX, SizeY, SizeZ];
 
     public Vector2i Location { get; init; }
+
+    private int _vertexBufferObject;
+    private int _vertexArrayObject;
 
     public const int SizeX = 16;
     public const int GenerateSizeX = 16;
@@ -34,16 +39,48 @@ public class Chunk
 
     public void Load()
     {
+        _vertexBufferObject = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
+        GL.BufferData(BufferTarget.ArrayBuffer, BlockModel.Vertices.Length * sizeof(float), BlockModel.Vertices, BufferUsageHint.StaticDraw);
+
+        _vertexArrayObject = GL.GenVertexArray();
+        GL.BindVertexArray(_vertexArrayObject);
+
+        List<Shader> loadedShader = [];
+
+        // load blocks & initialize shader
         watch.Start();
         for (int x = 0; x < SizeX; x++)
         for (int y = 0; y < SizeY; y++)
         for (int z = 0; z < SizeZ; z++)
         {
-            Blocks[x, y, z]?.Load();
+            var block = Blocks[x, y, z];
+            if (block is null)
+                continue;
+            if (!loadedShader.Contains(block.Shader))
+            {
+                loadedShader.Add(block.Shader);
+
+                var positionLocation = block.Shader.GetAttribLocation("aPos");
+                GL.EnableVertexAttribArray(positionLocation);
+                GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
+
+                var normalLocation = block.Shader.GetAttribLocation("aNormal");
+                GL.EnableVertexAttribArray(normalLocation);
+                GL.VertexAttribPointer(normalLocation, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 3 * sizeof(float));
+
+                if (block.Model.DiffuseMap is not null)
+                {
+                    var texCoordLocation = block.Shader.GetAttribLocation("aTexCoords");
+                    GL.EnableVertexAttribArray(texCoordLocation);
+                    GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), 6 * sizeof(float));
+                }
+            }
         }
         Console.WriteLine("Load time(ms): " + watch.Elapsed.TotalMilliseconds);
         watch.Restart();
 
+        // Calculate facecull
         for (int x = 0; x < GenerateSizeX; x++)
         for (int y = 0; y < GenerateSizeY; y++)
         for (int z = 0; z < GenerateSizeZ; z++)
@@ -70,13 +107,58 @@ public class Chunk
 
     public void Render(Camera camera, Vector3 light)
     {
+        Shader? shader = null;
         int count = 0;
         for (int x = 0; x < SizeX; x++)
         for (int y = 0; y < SizeY; y++)
         for (int z = 0; z < SizeZ; z++)
         {
-            Blocks[x, y, z]?.Render(camera, light);
+            var block = Blocks[x, y, z];
+            if (block is null)
+                continue;
             count++;
+            block.Model.DiffuseMap?.Use(TextureUnit.Texture0);
+            block.Model.SpecularMap?.Use(TextureUnit.Texture1);
+
+            if (block.Shader != shader)
+            {
+                shader = block.Shader;
+                shader.Use();
+                shader.SetMatrix4("view", camera.GetViewMatrix());
+                shader.SetMatrix4("projection", camera.GetProjectionMatrix());
+
+                if (block.Model.DiffuseMap is not null)
+                {
+                    shader.SetVector3("viewPos", camera.Position);
+                    shader.SetInt("material.diffuse", 0);
+                }
+                if (block.Model.SpecularMap is not null)
+                {
+                    shader.SetInt("material.specular", 1);
+                    shader.SetVector3("material.specular", new Vector3(0.5f, 0.5f, 0.5f));
+                    shader.SetFloat("material.shininess", 32.0f);
+
+                    shader.SetVector3("light.position", light);
+                    shader.SetVector3("light.ambient", new Vector3(0.2f));
+                    shader.SetVector3("light.diffuse", new Vector3(0.5f));
+                    shader.SetVector3("light.specular", new Vector3(1.0f));
+                }
+            }
+            block.Shader.SetMatrix4("model", Matrix4.Identity * Matrix4.CreateTranslation(block.Position));
+
+            if (block.DrawXyBack)
+                GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
+            if (block.DrawXyFront)
+                GL.DrawArrays(PrimitiveType.Triangles, 6, 6);
+            if (block.DrawYzBack)
+                GL.DrawArrays(PrimitiveType.Triangles, 12, 6);
+            if (block.DrawYzFront)
+                GL.DrawArrays(PrimitiveType.Triangles, 18, 6);
+            if (block.DrawBottom)
+                GL.DrawArrays(PrimitiveType.Triangles, 24, 6);
+            if (block.DrawTop)
+                GL.DrawArrays(PrimitiveType.Triangles, 30, 6);
         }
+        Console.WriteLine($"Rendered ${count} blocks");
     }
 }

@@ -8,7 +8,7 @@ public class BlockModel
 
     private static Dictionary<string, BlockModel> _cache = [];
 
-    public readonly float[] Vertices =
+    public static readonly float[] Vertices =
     {
         // Positions          Normals              Texture coords
          0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f, // xy back

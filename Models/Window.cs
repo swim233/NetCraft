@@ -16,7 +16,6 @@ public class Window : GameWindow
 
     /* private List<Block> _blocks; */
     private Chunk _chunk;
-    private Block _block;
 
     private Camera _camera;
     private Stopwatch _watch = new();
