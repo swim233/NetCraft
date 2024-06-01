@@ -13,7 +13,7 @@ public class Block
 
     private static List<string> _blockMap = new() { "blockLamp" };
 
-    public Vector3i Position { get; set; }
+    public required Vector3i Position { get; set; }
 
     public Shader Shader { get; init; }
 

@@ -1,4 +1,5 @@
 using System.Collections;
+using NetCraft.Models.Lights;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
@@ -13,10 +14,14 @@ public class Chunk
     private int _vertexBufferObject;
     private int _vertexArrayObject;
 
+    private int _shaderStorageBufferObject;
+
+    private PointLightAligned[] _pLights = Array.Empty<PointLightAligned>();
+
     public const int SizeX = 16;
     public const int GenerateSizeX = 16;
     public const int SizeY = 256;
-    public const int GenerateSizeY = 16;
+    public const int GenerateSizeY = 2;
     public const int SizeZ = 16;
     public const int GenerateSizeZ = 16;
 
@@ -48,8 +53,9 @@ public class Chunk
 
         List<Shader> loadedShader = [];
 
-        // load blocks & initialize shader
+        // load blocks & lights & initialize shader
         watch.Start();
+        var lights = new List<PointLight>();
         for (int x = 0; x < SizeX; x++)
         for (int y = 0; y < SizeY; y++)
         for (int z = 0; z < SizeZ; z++)
@@ -57,6 +63,11 @@ public class Chunk
             var block = Blocks[x, y, z];
             if (block is null)
                 continue;
+            if (block is IPointLight plight)
+            {
+                lights.Add(plight.PointLight);
+                Console.WriteLine($"Added light {block.Position}");
+            }
             if (!loadedShader.Contains(block.Shader))
             {
                 loadedShader.Add(block.Shader);
@@ -77,6 +88,21 @@ public class Chunk
                 }
             }
         }
+        _pLights = lights.Select(e => e.GetAligned()).ToArray();
+        Console.WriteLine($"Number of point lights: {_pLights.Length}");
+        Console.WriteLine("Size of PointLightAligned: " + System.Runtime.InteropServices.Marshal.SizeOf(typeof(PointLightAligned)));
+
+        _shaderStorageBufferObject = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ShaderStorageBuffer, _shaderStorageBufferObject);
+        GL.BufferData(BufferTarget.ShaderStorageBuffer, _pLights.Length * System.Runtime.InteropServices.Marshal.SizeOf(typeof(PointLightAligned)), _pLights, BufferUsageHint.StaticDraw);
+        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 0, _shaderStorageBufferObject); // match binding in shader.frag
+
+        loadedShader.ForEach(e =>
+        {
+            if (!e.LightShader)
+                e.SetInt("pLightNum", _pLights.Length);
+        });
+
         Console.WriteLine("Load time(ms): " + watch.Elapsed.TotalMilliseconds);
         watch.Restart();
 
@@ -137,13 +163,10 @@ public class Chunk
                     shader.SetInt("material.specular", 1);
                     shader.SetVector3("material.specular", new Vector3(0.5f, 0.5f, 0.5f));
                     shader.SetFloat("material.shininess", 32.0f);
-
-                    shader.SetVector3("light.position", light);
-                    shader.SetVector3("light.ambient", new Vector3(0.2f));
-                    shader.SetVector3("light.diffuse", new Vector3(0.5f));
-                    shader.SetVector3("light.specular", new Vector3(1.0f));
                 }
             }
+            if (block is IPointLight pLight)
+                shader.SetVector3("fragColor", pLight.PointLight.Diffuse);
             block.Shader.SetMatrix4("model", Matrix4.Identity * Matrix4.CreateTranslation(block.Position));
 
             if (block.DrawXyBack)

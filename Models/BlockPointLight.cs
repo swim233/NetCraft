@@ -1,0 +1,11 @@
+using NetCraft.Models.Lights;
+
+namespace NetCraft.Models;
+
+public class BlockPointLight : Block, IPointLight
+{
+    public BlockPointLight(string blockId)
+        : base(blockId) { }
+
+    public required PointLight PointLight { get; init; }
+}

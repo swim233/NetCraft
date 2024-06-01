@@ -7,8 +7,11 @@ namespace NetCraft.Models;
 public class Shader
 {
     public readonly int Handle;
+    private string _id;
     private static readonly Dictionary<string, Shader> _cache = new();
     private readonly Dictionary<string, int> _uniformLocations;
+
+    public bool LightShader = false;
 
     public static Shader GetShaderFromId(string id)
     {
@@ -30,8 +33,11 @@ public class Shader
     // A commented example of GLSL can be found in shader.vert.
     private Shader(string id)
     {
+        _id = id;
         string vertPath = $"Shaders/{id}.vert";
         string fragPath = $"Shaders/{id}.frag";
+        if (id == "blockLamp")
+            LightShader = true;
         // There are several different types of shaders, but the only two you need for basic rendering are the vertex and fragment shaders.
         // The vertex shader is responsible for moving around vertices, and uploading that data to the fragment shader.
         //   The vertex shader won't be too important here, but they'll be more important later.
@@ -48,13 +54,13 @@ public class Shader
         GL.ShaderSource(vertexShader, shaderSource);
 
         // And then compile
-        CompileShader(vertexShader);
+        CompileShader(vertexShader, _id + ".vert");
 
         // We do the same for the fragment shader.
         shaderSource = File.ReadAllText(fragPath);
         var fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
         GL.ShaderSource(fragmentShader, shaderSource);
-        CompileShader(fragmentShader);
+        CompileShader(fragmentShader, _id + ".frag");
 
         // These two shaders must then be merged into a shader program, which can then be used by OpenGL.
         // To do this, create a program...
@@ -98,7 +104,7 @@ public class Shader
         }
     }
 
-    private static void CompileShader(int shader)
+    private static void CompileShader(int shader, string name)
     {
         // Try to compile the shader
         GL.CompileShader(shader);
@@ -109,7 +115,7 @@ public class Shader
         {
             // We can use `GL.GetShaderInfoLog(shader)` to get information about the error.
             var infoLog = GL.GetShaderInfoLog(shader);
-            throw new Exception($"Error occurred whilst compiling Shader({shader}).\n\n{infoLog}");
+            throw new Exception($"Error occurred whilst compiling Shader({name}).\n\n{infoLog}");
         }
     }
 
@@ -157,7 +163,10 @@ public class Shader
     public void SetInt(string name, int data)
     {
         GL.UseProgram(Handle);
-        GL.Uniform1(_uniformLocations[name], data);
+        if (_uniformLocations.TryGetValue(name, out var location))
+            GL.Uniform1(_uniformLocations[name], data);
+        else
+            throw new KeyNotFoundException($"Shader {_id} doesn't have prpoerty {name}.");
     }
 
     /// <summary>
@@ -168,7 +177,10 @@ public class Shader
     public void SetFloat(string name, float data)
     {
         GL.UseProgram(Handle);
-        GL.Uniform1(_uniformLocations[name], data);
+        if (_uniformLocations.TryGetValue(name, out var location))
+            GL.Uniform1(_uniformLocations[name], data);
+        else
+            throw new KeyNotFoundException($"Shader {_id} doesn't have prpoerty {name}.");
     }
 
     /// <summary>
@@ -184,7 +196,10 @@ public class Shader
     public void SetMatrix4(string name, Matrix4 data)
     {
         GL.UseProgram(Handle);
-        GL.UniformMatrix4(_uniformLocations[name], true, ref data);
+        if (_uniformLocations.TryGetValue(name, out var location))
+            GL.UniformMatrix4(_uniformLocations[name], true, ref data);
+        else
+            throw new KeyNotFoundException($"Shader {_id} doesn't have prpoerty {name}.");
     }
 
     /// <summary>
@@ -195,6 +210,24 @@ public class Shader
     public void SetVector3(string name, Vector3 data)
     {
         GL.UseProgram(Handle);
-        GL.Uniform3(_uniformLocations[name], data);
+        if (_uniformLocations.TryGetValue(name, out var location))
+            GL.Uniform3(_uniformLocations[name], data);
+        else
+            throw new KeyNotFoundException($"Shader {_id} doesn't have prpoerty {name}.");
+    }
+
+    ///
+    /// <summary>
+    /// Set a uniform Vector4 on this shader.
+    /// </summary>
+    /// <param name="name">The name of the uniform</param>
+    /// <param name="data">The data to set</param>
+    public void SetVector4(string name, Vector4 data)
+    {
+        GL.UseProgram(Handle);
+        if (_uniformLocations.TryGetValue(name, out var location))
+            GL.Uniform4(_uniformLocations[name], data);
+        else
+            throw new KeyNotFoundException($"Shader {_id} doesn't have prpoerty {name}.");
     }
 }

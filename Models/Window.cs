@@ -14,7 +14,6 @@ public class Window : GameWindow
     private Shader _lampShader;
     private Shader _lightingShader;
 
-    /* private List<Block> _blocks; */
     private Chunk _chunk;
 
     private Camera _camera;
@@ -38,11 +37,54 @@ public class Window : GameWindow
         GL.Enable(EnableCap.CullFace);
         GL.CullFace(CullFaceMode.Back);
 
-        _camera = new Camera(new Vector3(6f, 17f, 6f), Size.X / (float)Size.Y);
+        _camera = new Camera(new Vector3(4f, 2f, 4f), Size.X / (float)Size.Y);
 
         _chunk = new((0, 0));
 
-        _chunk.Blocks[8, 15, 8] = new("blockLamp") { Position = (8, 15, 8), };
+        _chunk.Blocks[5, 2, 5] = new BlockPointLight("blockLamp")
+        {
+            Position = (5, 2, 5),
+            PointLight = new()
+            {
+                Position = (5, 2, 5),
+                Constant = 1f,
+                Linear = 0.09f,
+                Quadratic = 0.032f,
+                Ambient = (0.8f, 0f, 0f),
+                Diffuse = (1f, 0f, 0f),
+                Specular = (0.4f, 0f, 0f),
+            }
+        };
+
+        _chunk.Blocks[9, 2, 5] = new BlockPointLight("blockLamp")
+        {
+            Position = (9, 2, 5),
+            PointLight = new()
+            {
+                Position = (9, 2, 5),
+                Constant = 1f,
+                Linear = 0.09f,
+                Quadratic = 0.032f,
+                Ambient = (0f, 0.8f, 0f),
+                Diffuse = (0f, 1f, 0f),
+                Specular = (0.4f, 0f, 0f),
+            }
+        };
+
+        _chunk.Blocks[9, 2, 9] = new BlockPointLight("blockLamp")
+        {
+            Position = (9, 2, 9),
+            PointLight = new()
+            {
+                Position = (9, 2, 9),
+                Constant = 1f,
+                Linear = 0.09f,
+                Quadratic = 0.032f,
+                Ambient = (0f, 0, 0.8f),
+                Diffuse = (0f, 0f, 1f),
+                Specular = (0f, 0f, 0.4f),
+            }
+        };
 
         _chunk.Load();
 
