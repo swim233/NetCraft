@@ -17,6 +17,7 @@ public class Window : GameWindow
     private Chunk _chunk;
 
     private Camera _camera;
+
     private Stopwatch _watch = new();
 
     private bool _firstMove = true;
@@ -93,8 +94,8 @@ public class Window : GameWindow
 
     protected override void OnRenderFrame(FrameEventArgs e)
     {
+        _watch.Restart();
         base.OnRenderFrame(e);
-        _watch.Start();
 
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
@@ -102,8 +103,7 @@ public class Window : GameWindow
 
         SwapBuffers();
 
-        Console.WriteLine($"FPS: {Math.Round(1000d / _watch.Elapsed.TotalMilliseconds, 2)}({_watch.Elapsed.TotalMilliseconds}ms)");
-        _watch.Reset();
+        Console.WriteLine($"FPS: {Math.Round(1f / e.Time, 2)}({_watch.Elapsed.TotalMilliseconds}ms)");
     }
 
     protected override void OnUpdateFrame(FrameEventArgs e)

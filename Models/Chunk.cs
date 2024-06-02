@@ -182,6 +182,6 @@ public class Chunk
             if (block.DrawTop)
                 GL.DrawArrays(PrimitiveType.Triangles, 30, 6);
         }
-        Console.WriteLine($"Rendered ${count} blocks");
+        Console.WriteLine($"Rendered {count} blocks");
     }
 }
