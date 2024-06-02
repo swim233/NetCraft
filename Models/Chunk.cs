@@ -38,7 +38,7 @@ public class Chunk
         for (int y = 0; y < GenerateSizeY; y++)
         for (int z = 0; z < GenerateSizeZ; z++)
         {
-            Blocks[x, y, z] = new Block("container2") { Position = new(x + Location.X * SizeX, y, z + Location.Y * SizeZ), ChunkLocation = this.Location };
+            Blocks[x, y, z] = new Block("container2") { Location = new(x + Location.X * SizeX, y, z + Location.Y * SizeZ) };
         }
         Console.WriteLine("Construct time(ms): " + watch.Elapsed.TotalMilliseconds);
         watch.Reset();
@@ -68,7 +68,7 @@ public class Chunk
             if (block is IPointLight plight)
             {
                 lights.Add(plight.PointLight);
-                Console.WriteLine($"Added light {block.Position}");
+                Console.WriteLine($"Added light {block.Location}");
             }
             if (!loadedShader.Contains(block.Shader))
             {
@@ -169,7 +169,7 @@ public class Chunk
             }
             if (block is IPointLight pLight)
                 shader.SetVector3("fragColor", pLight.PointLight.Diffuse);
-            block.Shader.SetMatrix4("model", Matrix4.Identity * Matrix4.CreateTranslation(block.Position));
+            block.Shader.SetMatrix4("model", Matrix4.Identity * Matrix4.CreateTranslation(block.Location));
 
             if (block.DrawXyBack)
                 GL.DrawArrays(PrimitiveType.Triangles, 0, 6);

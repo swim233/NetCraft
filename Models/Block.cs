@@ -13,9 +13,9 @@ public class Block
 
     private static List<string> _blockMap = new() { "blockLamp" };
 
-    public required Vector3i Position { get; init; }
-    public required Vector2i ChunkLocation { get; init; }
-    public Vector3i LocalPosition => (Position.X % (ChunkLocation.X * Chunk.SizeX), Position.Y, Position.Z % (ChunkLocation.Y * Chunk.SizeZ));
+    public required Vector3i Location { get; init; }
+    public Vector2i ChunkLocation => (Location.X % Chunk.SizeX, Location.Z % Chunk.SizeZ);
+    public Vector3i LocalLocation => (Location.X - ChunkLocation.X * Chunk.SizeX, Location.Y, Location.Z - ChunkLocation.Y * Chunk.SizeZ);
 
     public Shader Shader { get; init; }
 
@@ -30,7 +30,7 @@ public class Block
 
     public void Dump()
     {
-        Console.WriteLine($"Block Position(Abs,Chk,Local): {Position} | {ChunkLocation} | {LocalPosition}");
+        Console.WriteLine($"Block Position(Abs,Chk,Local): {Location} | {ChunkLocation} | {LocalLocation}");
         Console.WriteLine($"Block Render: Top({DrawTop}) Bottom({DrawBottom}) XyFront({DrawXyFront}) XyBack({DrawXyBack}) YzFront({DrawYzFront}) YzBack({DrawYzBack})");
     }
 }
