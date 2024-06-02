@@ -45,6 +45,7 @@ public class Window : GameWindow
         _chunk.Blocks[5, 2, 5] = new BlockPointLight("blockLamp")
         {
             Position = (5, 2, 5),
+            ChunkLocation = _chunk.Location,
             PointLight = new()
             {
                 Position = (5, 2, 5),
@@ -60,6 +61,7 @@ public class Window : GameWindow
         _chunk.Blocks[9, 2, 5] = new BlockPointLight("blockLamp")
         {
             Position = (9, 2, 5),
+            ChunkLocation = _chunk.Location,
             PointLight = new()
             {
                 Position = (9, 2, 5),
@@ -75,6 +77,7 @@ public class Window : GameWindow
         _chunk.Blocks[9, 2, 9] = new BlockPointLight("blockLamp")
         {
             Position = (9, 2, 9),
+            ChunkLocation = _chunk.Location,
             PointLight = new()
             {
                 Position = (9, 2, 9),

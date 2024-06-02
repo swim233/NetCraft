@@ -18,6 +18,8 @@ public class Chunk
 
     private PointLightAligned[] _pLights = Array.Empty<PointLightAligned>();
 
+    private static Stopwatch _watch = new();
+
     public const int SizeX = 16;
     public const int GenerateSizeX = 16;
     public const int SizeY = 256;
@@ -36,7 +38,7 @@ public class Chunk
         for (int y = 0; y < GenerateSizeY; y++)
         for (int z = 0; z < GenerateSizeZ; z++)
         {
-            Blocks[x, y, z] = new Block("container2") { Position = new(x + Location.X * SizeX, y, z + Location.Y * SizeZ), };
+            Blocks[x, y, z] = new Block("container2") { Position = new(x + Location.X * SizeX, y, z + Location.Y * SizeZ), ChunkLocation = this.Location };
         }
         Console.WriteLine("Construct time(ms): " + watch.Elapsed.TotalMilliseconds);
         watch.Reset();
@@ -54,11 +56,11 @@ public class Chunk
         List<Shader> loadedShader = [];
 
         // load blocks & lights & initialize shader
-        watch.Start();
+        _watch.Start();
         var lights = new List<PointLight>();
-        for (int x = 0; x < SizeX; x++)
-        for (int y = 0; y < SizeY; y++)
-        for (int z = 0; z < SizeZ; z++)
+        for (int x = 0; x < Chunk.SizeX; x++)
+        for (int y = 0; y < Chunk.SizeY; y++)
+        for (int z = 0; z < Chunk.SizeZ; z++)
         {
             var block = Blocks[x, y, z];
             if (block is null)
