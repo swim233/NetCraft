@@ -172,17 +172,17 @@ public class Chunk
                 shader.SetVector3("fragColor", pLight.PointLight.Diffuse);
             block.Shader.SetMatrix4("model", Matrix4.Identity * Matrix4.CreateTranslation(block.Location));
 
-            if (block.FaceCulling.HasFlag(BlockFaceCulling.XyBack))
-                GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
-            if (block.FaceCulling.HasFlag(BlockFaceCulling.XyFront))
-                GL.DrawArrays(PrimitiveType.Triangles, 6, 6);
-            if (block.FaceCulling.HasFlag(BlockFaceCulling.ZyBack))
-                GL.DrawArrays(PrimitiveType.Triangles, 12, 6);
-            if (block.FaceCulling.HasFlag(BlockFaceCulling.ZyFront))
-                GL.DrawArrays(PrimitiveType.Triangles, 18, 6);
-            if (block.FaceCulling.HasFlag(BlockFaceCulling.Bottom))
-                GL.DrawArrays(PrimitiveType.Triangles, 24, 6);
             if (block.FaceCulling.HasFlag(BlockFaceCulling.Top))
+                GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
+            if (block.FaceCulling.HasFlag(BlockFaceCulling.Bottom))
+                GL.DrawArrays(PrimitiveType.Triangles, 6, 6);
+            if (block.FaceCulling.HasFlag(BlockFaceCulling.XyFront))
+                GL.DrawArrays(PrimitiveType.Triangles, 12, 6);
+            if (block.FaceCulling.HasFlag(BlockFaceCulling.XyBack))
+                GL.DrawArrays(PrimitiveType.Triangles, 18, 6);
+            if (block.FaceCulling.HasFlag(BlockFaceCulling.ZyFront))
+                GL.DrawArrays(PrimitiveType.Triangles, 24, 6);
+            if (block.FaceCulling.HasFlag(BlockFaceCulling.ZyBack))
                 GL.DrawArrays(PrimitiveType.Triangles, 30, 6);
         }
         Console.WriteLine($"Rendered {count} blocks");

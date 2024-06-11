@@ -25,17 +25,17 @@ public class Block
     public List<float> GetVertices(List<float> collection)
     {
         if (FaceCulling.HasFlag(BlockFaceCulling.Top))
-            collection.AddRange(BlockModel.Vertices.Take(new Range(30, 36)));
-        if (FaceCulling.HasFlag(BlockFaceCulling.Bottom))
-            collection.AddRange(BlockModel.Vertices.Take(new Range(24, 30)));
-        if (FaceCulling.HasFlag(BlockFaceCulling.XyFront))
-            collection.AddRange(BlockModel.Vertices.Take(new Range(6, 12)));
-        if (FaceCulling.HasFlag(BlockFaceCulling.XyBack))
             collection.AddRange(BlockModel.Vertices.Take(new Range(0, 6)));
-        if (FaceCulling.HasFlag(BlockFaceCulling.ZyFront))
-            collection.AddRange(BlockModel.Vertices.Take(new Range(18, 24)));
-        if (FaceCulling.HasFlag(BlockFaceCulling.ZyBack))
+        if (FaceCulling.HasFlag(BlockFaceCulling.Bottom))
+            collection.AddRange(BlockModel.Vertices.Take(new Range(6, 12)));
+        if (FaceCulling.HasFlag(BlockFaceCulling.XyFront))
             collection.AddRange(BlockModel.Vertices.Take(new Range(12, 18)));
+        if (FaceCulling.HasFlag(BlockFaceCulling.XyBack))
+            collection.AddRange(BlockModel.Vertices.Take(new Range(18, 24)));
+        if (FaceCulling.HasFlag(BlockFaceCulling.ZyFront))
+            collection.AddRange(BlockModel.Vertices.Take(new Range(24, 30)));
+        if (FaceCulling.HasFlag(BlockFaceCulling.ZyBack))
+            collection.AddRange(BlockModel.Vertices.Take(new Range(30, 36)));
         return collection;
     }
 
