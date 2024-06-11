@@ -10,7 +10,11 @@ public class Block
     {
         Shader = Shader.GetShaderFromId(_blockMap.Contains(blockId) ? blockId : "blockNormal");
         Model = BlockModel.GetModel(blockId);
+        var debug = new DebugCapability(this);
+        Capabilities.Add(debug);
     }
+
+    public IList<Capability> Capabilities = new List<Capability>();
 
     private static List<string> _blockMap = new() { "blockLamp" };
 
@@ -41,13 +45,7 @@ public class Block
 
     public BlockModel Model { get; init; }
 
-    public void Dump()
-    {
-        Console.WriteLine($"Block Position(Abs,Chk,Local): {Location} | {ChunkLocation} | {LocalLocation}");
-        Console.WriteLine($"Block Face Trimed: {GetFaceCullingString()}");
-    }
-
-    protected string GetFaceCullingString()
+    public string GetFaceCullingString()
     {
         System.Text.StringBuilder builder = new();
 

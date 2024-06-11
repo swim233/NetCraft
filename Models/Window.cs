@@ -114,7 +114,8 @@ public class Window : GameWindow
         Console.WriteLine("CameraFacing: " + _camera.Front);
         try
         {
-            _chunk.Blocks[(int)_camera.Position.X, (int)_camera.Position.Y, (int)_camera.Position.Z]?.Dump();
+            var cap = (DebugCapability)_chunk.Blocks[(int)_camera.Position.X, (int)_camera.Position.Y, (int)_camera.Position.Z]?.Capabilities.FirstOrDefault(e => e is DebugCapability)!;
+            cap.Dump();
         }
         catch (IndexOutOfRangeException)
         {
