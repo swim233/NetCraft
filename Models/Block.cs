@@ -1,3 +1,4 @@
+using NetCraft.Models.Enums;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
@@ -19,18 +20,64 @@ public class Block
 
     public Shader Shader { get; init; }
 
-    public bool DrawTop { get; set; } = true;
-    public bool DrawBottom { get; set; } = true;
-    public bool DrawXyFront { get; set; } = true;
-    public bool DrawXyBack { get; set; } = true;
-    public bool DrawYzFront { get; set; } = true;
-    public bool DrawYzBack { get; set; } = true;
+    public BlockFaceCulling FaceCulling { get; set; } = (BlockFaceCulling)0b111111;
+
+    public List<float> GetVertices(List<float> collection)
+    {
+        if (FaceCulling.HasFlag(BlockFaceCulling.Top))
+            collection.AddRange(BlockModel.Vertices.Take(new Range(30, 36)));
+        if (FaceCulling.HasFlag(BlockFaceCulling.Bottom))
+            collection.AddRange(BlockModel.Vertices.Take(new Range(24, 30)));
+        if (FaceCulling.HasFlag(BlockFaceCulling.XyFront))
+            collection.AddRange(BlockModel.Vertices.Take(new Range(6, 12)));
+        if (FaceCulling.HasFlag(BlockFaceCulling.XyBack))
+            collection.AddRange(BlockModel.Vertices.Take(new Range(0, 6)));
+        if (FaceCulling.HasFlag(BlockFaceCulling.ZyFront))
+            collection.AddRange(BlockModel.Vertices.Take(new Range(18, 24)));
+        if (FaceCulling.HasFlag(BlockFaceCulling.ZyBack))
+            collection.AddRange(BlockModel.Vertices.Take(new Range(12, 18)));
+        return collection;
+    }
 
     public BlockModel Model { get; init; }
 
     public void Dump()
     {
         Console.WriteLine($"Block Position(Abs,Chk,Local): {Location} | {ChunkLocation} | {LocalLocation}");
-        Console.WriteLine($"Block Render: Top({DrawTop}) Bottom({DrawBottom}) XyFront({DrawXyFront}) XyBack({DrawXyBack}) YzFront({DrawYzFront}) YzBack({DrawYzBack})");
+        Console.WriteLine($"Block Face Trimed: {GetFaceCullingString()}");
+    }
+
+    protected string GetFaceCullingString()
+    {
+        System.Text.StringBuilder builder = new();
+
+        if (FaceCulling.HasFlag(BlockFaceCulling.Top))
+            builder.Append("Top ");
+        if (FaceCulling.HasFlag(BlockFaceCulling.Bottom))
+            builder.Append("Bottom ");
+        if (FaceCulling.HasFlag(BlockFaceCulling.XyFront))
+            builder.Append("XyFront ");
+        if (FaceCulling.HasFlag(BlockFaceCulling.XyBack))
+            builder.Append("XyBack ");
+        if (FaceCulling.HasFlag(BlockFaceCulling.ZyFront))
+            builder.Append("ZyFront ");
+        if (FaceCulling.HasFlag(BlockFaceCulling.ZyBack))
+            builder.Append("ZyBack ");
+        return builder.ToString().TrimEnd();
+    }
+
+    protected static int CountTrueFlags<T>(T flags)
+        where T : Enum
+    {
+        int count = 0;
+        int flagValue = Convert.ToInt32(flags);
+
+        while (flagValue != 0)
+        {
+            flagValue &= (flagValue - 1);
+            count++;
+        }
+
+        return count;
     }
 }
