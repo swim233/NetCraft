@@ -4,5 +4,5 @@ global using NetCraft.Models;
 using System;
 using OpenTK;
 
-using var window = new Window(new() { UpdateFrequency = 500 }, new() { });
+using var window = new Window(new() { UpdateFrequency = 1000, }, new() { ClientSize = (960, 540) });
 window.Run();
