@@ -10,6 +10,8 @@ public class Block
     {
         Shader = Shader.GetShaderFromId(_blockMap.Contains(blockId) ? blockId : "blockNormal");
         Model = BlockModel.GetModel(blockId);
+        DiffuseMap = Texture.LoadDiffuseFromId(blockId);
+        SpecularMap = Texture.LoadSpecularFromId(blockId);
         var debug = new DebugCapability(this);
         Capabilities.Add(debug);
     }
@@ -17,6 +19,9 @@ public class Block
     public IList<Capability> Capabilities = new List<Capability>();
 
     private static List<string> _blockMap = new() { "blockLamp" };
+
+    public Texture? DiffuseMap { get; init; }
+    public Texture? SpecularMap { get; init; }
 
     public required Vector3i Location { get; init; }
     public Vector2i ChunkLocation => (Location.X % Chunk.SizeX, Location.Z % Chunk.SizeZ);

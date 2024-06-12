@@ -83,7 +83,7 @@ public class Chunk
                 GL.EnableVertexAttribArray(normalLocation);
                 GL.VertexAttribPointer(normalLocation, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 3 * sizeof(float));
 
-                if (block.Model.DiffuseMap is not null)
+                if (block.DiffuseMap is not null)
                 {
                     var texCoordLocation = block.Shader.GetAttribLocation("aTexCoords");
                     GL.EnableVertexAttribArray(texCoordLocation);
@@ -146,8 +146,8 @@ public class Chunk
             if (block is null)
                 continue;
             count++;
-            block.Model.DiffuseMap?.Use(TextureUnit.Texture0);
-            block.Model.SpecularMap?.Use(TextureUnit.Texture1);
+            block.DiffuseMap?.Use(TextureUnit.Texture0);
+            block.SpecularMap?.Use(TextureUnit.Texture1);
 
             if (block.Shader != shader)
             {
@@ -156,12 +156,12 @@ public class Chunk
                 shader.SetMatrix4("view", camera.GetViewMatrix());
                 shader.SetMatrix4("projection", camera.GetProjectionMatrix());
 
-                if (block.Model.DiffuseMap is not null)
+                if (block.DiffuseMap is not null)
                 {
                     shader.SetVector3("viewPos", camera.Position);
                     shader.SetInt("material.diffuse", 0);
                 }
-                if (block.Model.SpecularMap is not null)
+                if (block.SpecularMap is not null)
                 {
                     shader.SetInt("material.specular", 1);
                     shader.SetVector3("material.specular", new Vector3(0.5f, 0.5f, 0.5f));

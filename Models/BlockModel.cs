@@ -54,10 +54,6 @@ public class BlockModel
         -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
     };
 
-    public Texture? DiffuseMap {get;init;}
-
-    public Texture? SpecularMap {get;init;}
-
     public static BlockModel GetModel(string blockId)
     {
         if(_cache.TryGetValue(blockId, out var value))
@@ -66,11 +62,7 @@ public class BlockModel
         }
         else
         {
-            BlockModel model = new()
-            {
-                DiffuseMap = Texture.LoadDiffuseFromId(blockId),
-                SpecularMap = Texture.LoadSpecularFromId(blockId),
-            };
+            BlockModel model = new();
             _cache.Add(blockId, model);
             return model;
         }
