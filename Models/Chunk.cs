@@ -8,7 +8,7 @@ namespace NetCraft;
 
 public class Chunk
 {
-    public Block?[,,] Blocks { get; set; } = new Block[SizeX, SizeY, SizeZ];
+    public WorldBlock?[,,] Blocks { get; set; } = new WorldBlock[SizeX, SizeY, SizeZ];
 
     public Vector2i Location { get; init; }
 
@@ -39,7 +39,7 @@ public class Chunk
         for (int y = 0; y < GenerateSizeY; y++)
         for (int z = 0; z < GenerateSizeZ; z++)
         {
-            Blocks[x, y, z] = new Block("container2") { Location = new(x + Location.X * SizeX, y, z + Location.Y * SizeZ) };
+            Blocks[x, y, z] = new WorldBlock("container2") { Location = new(x + Location.X * SizeX, y, z + Location.Y * SizeZ) };
         }
         Console.WriteLine("Construct time(ms): " + watch.Elapsed.TotalMilliseconds);
         watch.Reset();
@@ -49,7 +49,7 @@ public class Chunk
     {
         _vertexBufferObject = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
-        GL.BufferData(BufferTarget.ArrayBuffer, BlockModel.Vertices.Length * sizeof(float), BlockModel.Vertices, BufferUsageHint.StaticDraw);
+        GL.BufferData(BufferTarget.ArrayBuffer, LocalBlock.Vertices.Length * sizeof(float), LocalBlock.Vertices, BufferUsageHint.StaticDraw);
 
         _vertexArrayObject = GL.GenVertexArray();
         GL.BindVertexArray(_vertexArrayObject);
@@ -114,7 +114,7 @@ public class Chunk
         for (int y = 0; y < GenerateSizeY; y++)
         for (int z = 0; z < GenerateSizeZ; z++)
         {
-            Block? block = Blocks[x, y, z];
+            WorldBlock? block = Blocks[x, y, z];
             if (block is null)
                 continue;
             if (y < SizeY - 1 && Blocks[x, y + 1, z] is not null)

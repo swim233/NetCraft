@@ -2,7 +2,7 @@ using NetCraft.Models.Lights;
 
 namespace NetCraft.Models;
 
-public class BlockPointLight : Block, IPointLight
+public class BlockPointLight : WorldBlock, IPointLight
 {
     public BlockPointLight(string blockId)
         : base(blockId) { }

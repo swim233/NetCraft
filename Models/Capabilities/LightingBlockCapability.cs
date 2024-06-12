@@ -8,10 +8,10 @@ public sealed class LightingBlockCapability : Capability
     public override CapabilityApplyAction ApplyAction =>
         obj =>
         {
-            if (obj is not Block block)
+            if (obj is not WorldBlock block)
                 throw new InvalidOperationException("Not a block.");
             this.block = block;
         };
 
-    private Block? block;
+    private WorldBlock? block;
 }

@@ -1,12 +1,12 @@
 namespace NetCraft.Models;
 
 // Example model for a cube
-public class BlockModel
+public class LocalBlock
 {
-    private BlockModel()
+    private LocalBlock()
     { }
 
-    private static Dictionary<string, BlockModel> _cache = [];
+    private static Dictionary<string, LocalBlock> _cache = [];
 
     public static readonly float[] Vertices =
     {
@@ -54,7 +54,7 @@ public class BlockModel
         -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
     };
 
-    public static BlockModel GetModel(string blockId)
+    public static LocalBlock GetModel(string blockId)
     {
         if(_cache.TryGetValue(blockId, out var value))
         {
@@ -62,7 +62,7 @@ public class BlockModel
         }
         else
         {
-            BlockModel model = new();
+            LocalBlock model = new();
             _cache.Add(blockId, model);
             return model;
         }

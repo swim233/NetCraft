@@ -7,7 +7,7 @@ public sealed class DebugCapability : Capability
     {
         switch (BaseObject)
         {
-            case var obj when obj is Block block:
+            case var obj when obj is WorldBlock block:
                 Console.WriteLine($"Block Position(Abs,Chk,Local): {block.Location} | {block.ChunkLocation} | {block.LocalLocation}");
                 Console.WriteLine($"Block Face Trimed: {block.GetFaceCullingString()}");
                 break;
