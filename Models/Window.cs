@@ -1,3 +1,6 @@
+using System;
+using System.Diagnostics;
+using System.Linq;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -6,9 +9,6 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace NetCraft.Models;
 
-// In this tutorial we take a look at how we can use textures to make the light settings we set up in the last episode
-// different per fragment instead of making them per object.
-// Remember to check out the shaders for how we converted to using textures there.
 public class Window : GameWindow
 {
     private Shader _lampShader;
@@ -92,6 +92,12 @@ public class Window : GameWindow
         CursorState = CursorState.Grabbed;
     }
 
+    public void OnWebSocketMessageReceived(string message)
+    {
+        Console.WriteLine("WebSocket Message: " + message);
+        // 这里可以添加对消息的更多处理逻辑
+    }
+
     protected override void OnRenderFrame(FrameEventArgs e)
     {
         _watch.Restart();
@@ -103,7 +109,9 @@ public class Window : GameWindow
 
         SwapBuffers();
 
-        Console.WriteLine($"FPS: {Math.Round(1f / e.Time, 2)}({_watch.Elapsed.TotalMilliseconds}ms)");
+        Console.WriteLine(
+            $"FPS: {Math.Round(1f / e.Time, 2)}({_watch.Elapsed.TotalMilliseconds}ms)"
+        );
     }
 
     protected override void OnUpdateFrame(FrameEventArgs e)
@@ -114,7 +122,14 @@ public class Window : GameWindow
         Console.WriteLine("CameraFacing: " + _camera.Front);
         try
         {
-            var cap = (DebugCapability)_chunk.Blocks[(int)_camera.Position.X, (int)_camera.Position.Y, (int)_camera.Position.Z]?.Capabilities.FirstOrDefault(e => e is DebugCapability)!;
+            var cap = (DebugCapability)
+                _chunk
+                    .Blocks[
+                        (int)_camera.Position.X,
+                        (int)_camera.Position.Y,
+                        (int)_camera.Position.Z
+                    ]
+                    ?.Capabilities.FirstOrDefault(e => e is DebugCapability)!;
             cap.Dump();
         }
         catch (IndexOutOfRangeException)
@@ -148,19 +163,31 @@ public class Window : GameWindow
 
         if (input.IsKeyDown(Keys.W))
         {
-            _camera.Position += new Vector3(_camera.Front.X, 0f, _camera.Front.Z).Normalized() * cameraSpeed * (float)e.Time; // Forward
+            _camera.Position +=
+                new Vector3(_camera.Front.X, 0f, _camera.Front.Z).Normalized()
+                * cameraSpeed
+                * (float)e.Time; // Forward
         }
         if (input.IsKeyDown(Keys.S))
         {
-            _camera.Position -= new Vector3(_camera.Front.X, 0f, _camera.Front.Z).Normalized() * cameraSpeed * (float)e.Time; // Backward
+            _camera.Position -=
+                new Vector3(_camera.Front.X, 0f, _camera.Front.Z).Normalized()
+                * cameraSpeed
+                * (float)e.Time; // Backward
         }
         if (input.IsKeyDown(Keys.A))
         {
-            _camera.Position -= new Vector3(_camera.Right.X, 0f, _camera.Right.Z).Normalized() * cameraSpeed * (float)e.Time; // Left
+            _camera.Position -=
+                new Vector3(_camera.Right.X, 0f, _camera.Right.Z).Normalized()
+                * cameraSpeed
+                * (float)e.Time; // Left
         }
         if (input.IsKeyDown(Keys.D))
         {
-            _camera.Position += new Vector3(_camera.Right.X, 0f, _camera.Right.Z).Normalized() * cameraSpeed * (float)e.Time; // Right
+            _camera.Position +=
+                new Vector3(_camera.Right.X, 0f, _camera.Right.Z).Normalized()
+                * cameraSpeed
+                * (float)e.Time; // Right
         }
         if (input.IsKeyDown(Keys.Space))
         {
@@ -201,6 +228,14 @@ public class Window : GameWindow
         base.OnResize(e);
 
         GL.Viewport(0, 0, Size.X, Size.Y);
+
         _camera.AspectRatio = Size.X / (float)Size.Y;
+    }
+
+    protected override void OnUnload()
+    {
+        base.OnUnload();
+
+        _chunk.Dispose();
     }
 }

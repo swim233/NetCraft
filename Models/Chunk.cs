@@ -1,4 +1,7 @@
-using System.Collections;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using NetCraft.Models.Enums;
 using NetCraft.Models.Lights;
 using OpenTK.Graphics.OpenGL4;
@@ -6,7 +9,7 @@ using OpenTK.Mathematics;
 
 namespace NetCraft;
 
-public class Chunk
+public class Chunk : IDisposable
 {
     public WorldBlock?[,,] Blocks { get; set; } = new WorldBlock[SizeX, SizeY, SizeZ];
 
@@ -39,7 +42,10 @@ public class Chunk
         for (int y = 0; y < GenerateSizeY; y++)
         for (int z = 0; z < GenerateSizeZ; z++)
         {
-            Blocks[x, y, z] = new WorldBlock("container2") { Location = new(x + Location.X * SizeX, y, z + Location.Y * SizeZ) };
+            Blocks[x, y, z] = new WorldBlock("container2")
+            {
+                Location = new(x + Location.X * SizeX, y, z + Location.Y * SizeZ)
+            };
         }
         Console.WriteLine("Construct time(ms): " + watch.Elapsed.TotalMilliseconds);
         watch.Reset();
@@ -49,12 +55,17 @@ public class Chunk
     {
         _vertexBufferObject = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
-        GL.BufferData(BufferTarget.ArrayBuffer, LocalBlock.Vertices.Length * sizeof(float), LocalBlock.Vertices, BufferUsageHint.StaticDraw);
+        GL.BufferData(
+            BufferTarget.ArrayBuffer,
+            LocalBlock.Vertices.Length * sizeof(float),
+            LocalBlock.Vertices,
+            BufferUsageHint.StaticDraw
+        );
 
         _vertexArrayObject = GL.GenVertexArray();
         GL.BindVertexArray(_vertexArrayObject);
 
-        List<Shader> loadedShader = [];
+        List<Shader> loadedShader = new();
 
         // load blocks & lights & initialize shader
         _watch.Start();
@@ -77,27 +88,57 @@ public class Chunk
 
                 var positionLocation = block.Shader.GetAttribLocation("aPos");
                 GL.EnableVertexAttribArray(positionLocation);
-                GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
+                GL.VertexAttribPointer(
+                    positionLocation,
+                    3,
+                    VertexAttribPointerType.Float,
+                    false,
+                    8 * sizeof(float),
+                    0
+                );
 
                 var normalLocation = block.Shader.GetAttribLocation("aNormal");
                 GL.EnableVertexAttribArray(normalLocation);
-                GL.VertexAttribPointer(normalLocation, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 3 * sizeof(float));
+                GL.VertexAttribPointer(
+                    normalLocation,
+                    3,
+                    VertexAttribPointerType.Float,
+                    false,
+                    8 * sizeof(float),
+                    3 * sizeof(float)
+                );
 
                 if (block.DiffuseMap is not null)
                 {
                     var texCoordLocation = block.Shader.GetAttribLocation("aTexCoords");
                     GL.EnableVertexAttribArray(texCoordLocation);
-                    GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), 6 * sizeof(float));
+                    GL.VertexAttribPointer(
+                        texCoordLocation,
+                        2,
+                        VertexAttribPointerType.Float,
+                        false,
+                        8 * sizeof(float),
+                        6 * sizeof(float)
+                    );
                 }
             }
         }
         _pLights = lights.Select(e => e.GetAligned()).ToArray();
         Console.WriteLine($"Number of point lights: {_pLights.Length}");
-        Console.WriteLine("Size of PointLightAligned: " + System.Runtime.InteropServices.Marshal.SizeOf(typeof(PointLightAligned)));
+        Console.WriteLine(
+            "Size of PointLightAligned: "
+                + System.Runtime.InteropServices.Marshal.SizeOf(typeof(PointLightAligned))
+        );
 
         _shaderStorageBufferObject = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ShaderStorageBuffer, _shaderStorageBufferObject);
-        GL.BufferData(BufferTarget.ShaderStorageBuffer, _pLights.Length * System.Runtime.InteropServices.Marshal.SizeOf(typeof(PointLightAligned)), _pLights, BufferUsageHint.StaticDraw);
+        GL.BufferData(
+            BufferTarget.ShaderStorageBuffer,
+            _pLights.Length
+                * System.Runtime.InteropServices.Marshal.SizeOf(typeof(PointLightAligned)),
+            _pLights,
+            BufferUsageHint.StaticDraw
+        );
         GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 0, _shaderStorageBufferObject); // match binding in shader.frag
 
         loadedShader.ForEach(e =>
@@ -170,7 +211,10 @@ public class Chunk
             }
             if (block is IPointLight pLight)
                 shader.SetVector3("fragColor", pLight.PointLight.Diffuse);
-            block.Shader.SetMatrix4("model", Matrix4.Identity * Matrix4.CreateTranslation(block.Location));
+            block.Shader.SetMatrix4(
+                "model",
+                Matrix4.Identity * Matrix4.CreateTranslation(block.Location)
+            );
 
             if (block.FaceCulling.HasFlag(BlockFaceCulling.Top))
                 GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
@@ -186,5 +230,12 @@ public class Chunk
                 GL.DrawArrays(PrimitiveType.Triangles, 30, 6);
         }
         Console.WriteLine($"Rendered {count} blocks");
+    }
+
+    public void Dispose()
+    {
+        GL.DeleteBuffer(_vertexBufferObject);
+        GL.DeleteVertexArray(_vertexArrayObject);
+        GL.DeleteBuffer(_shaderStorageBufferObject);
     }
 }
